@@ -37,7 +37,6 @@ async def lifespan(app: FastAPI):
     
     if not os.path.exists(abs_model_path):
         print(f"[ERROR] Model not found at: {abs_model_path}")
-        # On Render, we want to know exactly what the file system looks like if it fails
         print(f"Current Directory: {os.getcwd()}")
         print(f"Directory Contents: {os.listdir(os.path.dirname(abs_model_path))}")
         raise RuntimeError("Model file missing.")
@@ -56,13 +55,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# FIXED: Correct way to add CORS in FastAPI
+# Open CORS configuration for testing
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://sentinel-ml-detector-ziw4.vercel.app"  # Your Vercel URL
-    ],
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -115,6 +111,8 @@ async def scan_file(file: UploadFile = File(...)):
         # 2. Native XGBoost Inference
         dmatrix = xgb.DMatrix(features)
         probabilities = model.predict(dmatrix)
+        
+        # FIXED: Extracting the scalar using .flatten()
         confidence_score_raw = float(probabilities.flatten())
 
         # 3. Meta-analysis
