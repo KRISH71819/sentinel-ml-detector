@@ -138,3 +138,9 @@ async def scan_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail={"message": f"Internal Error: {str(e)}"})
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
+
+# ── Run directly ──────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    
