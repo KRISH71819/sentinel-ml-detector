@@ -109,11 +109,9 @@ async def scan_file(file: UploadFile = File(...)):
         features = extract_features(temp_path)
 
         # 2. Native XGBoost Inference
-        dmatrix = xgb.DMatrix(features)
+        dmatrix = xgb.DMatrix([features])
         probabilities = model.predict(dmatrix)
-        
-        # FIXED: Extracting the scalar using .flatten()
-        confidence_score_raw = float(probabilities.flatten())
+        confidence_score_raw = float(probabilities.tolist())
 
         # 3. Meta-analysis
         scan_duration_ms = round((time.time() - scan_start) * 1000)
