@@ -7,4 +7,6 @@ lief==0.17.6
 lightgbm
 scikit-learn
 numpy
+tqdm
+pandas
 git+https://github.com/elastic/ember.git
