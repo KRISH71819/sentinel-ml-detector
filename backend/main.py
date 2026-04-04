@@ -105,20 +105,17 @@ async def scan_file(file: UploadFile = File(...)):
 
         scan_start = time.time()
         
-        # 1. Extract 2,381 features
-        raw_features = extract_features(temp_path)
+        # 1. Extract 2,381 features (Your feature_extractor.py already makes this 2D)
+        features_2d = extract_features(temp_path)
 
-        # 2. BULLETPROOF INPUT: Force strict 2D matrix (1 row, 2381 columns)
-        features_2d = np.array(raw_features, dtype=float).reshape(1, -1)
-
-        # 3. Native XGBoost Inference
+        # 2. Native XGBoost Inference
         dmatrix = xgb.DMatrix(features_2d)
         probabilities = model.predict(dmatrix)
 
-        # 4. BULLETPROOF OUTPUT: Flatten any shape into a 1D list and grab the first item
-        confidence_score_raw = float(np.array(probabilities).flatten())
+        # 3. BULLETPROOF OUTPUT: .item() forces ANY 1-item array into a standard Python float
+        confidence_score_raw = float(probabilities.item())
 
-        # 5. Meta-analysis
+        # 4. Meta-analysis
         scan_duration_ms = round((time.time() - scan_start) * 1000)
         pe_metadata = get_pe_metadata(temp_path)
         
@@ -145,4 +142,4 @@ async def scan_file(file: UploadFile = File(...)):
 # ── Run directly ──────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True) 
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
